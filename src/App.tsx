@@ -12,24 +12,42 @@ export default function App() {
     setGameState('guessing');
     setTimeout(() => {
       if (audioRef.current) {
-        audioRef.current.volume = 0.4;
+        audioRef.current.volume = 0;
         audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+        
+        const fadeIn = setInterval(() => {
+          if (audioRef.current && audioRef.current.volume < 0.3) {
+            let newVolume = audioRef.current.volume + 0.005;
+            if (newVolume > 0.3) newVolume = 0.3;
+            audioRef.current.volume = newVolume;
+          } else {
+            clearInterval(fadeIn);
+          }
+        }, 100);
       }
-    }, 1500);
+    }, 1300);
   };
 
   const handleCorrectSelect = () => {
     if (audioRef.current) {
-      // Fade out audio over 1 second
-      const fadeAudio = setInterval(() => {
-        if (audioRef.current && audioRef.current.volume > 0.05) {
-          audioRef.current.volume -= 0.05;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const handleCloseNotebook = () => {
+    setGameState('guessing');
+    if (audioRef.current) {
+      audioRef.current.volume = 0;
+      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+      
+      const fadeIn = setInterval(() => {
+        if (audioRef.current && audioRef.current.volume < 0.3) {
+          let newVolume = audioRef.current.volume + 0.005;
+          if (newVolume > 0.3) newVolume = 0.3;
+          audioRef.current.volume = newVolume;
         } else {
-          clearInterval(fadeAudio);
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-          }
+          clearInterval(fadeIn);
         }
       }, 100);
     }
@@ -39,7 +57,7 @@ export default function App() {
     <div className="bg-gloomy-pulse overflow-hidden font-serif h-screen w-screen fixed inset-0">
       <audio 
         ref={audioRef} 
-        src="https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/main/Background%20Track%20for%20HERO.mp3" 
+        src="https://raw.githubusercontent.com/Stuntyman20/My-Website-Portfolio/main/Background_Track_Hero.mp3" 
         loop 
       />
       <AnimatePresence mode="sync">
@@ -53,9 +71,7 @@ export default function App() {
           >
             <motion.button
               onClick={handleStart}
-              animate={{ y: [0, -20, 0] }}
               exit={{ opacity: 0, scale: 3, filter: "blur(20px)", transition: { duration: 1, ease: "easeOut" } }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="relative overflow-hidden px-14 py-5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all duration-300 shadow-lg border border-white/20 text-white font-sans tracking-widest uppercase text-base group cursor-pointer"
             >
               <span className="relative z-10">Start</span>
@@ -79,7 +95,7 @@ export default function App() {
           />
         )}
         {gameState === 'notebook' && (
-          <Notebook key="notebook" onClose={() => setGameState('guessing')} />
+          <Notebook key="notebook" onClose={handleCloseNotebook} />
         )}
       </AnimatePresence>
     </div>

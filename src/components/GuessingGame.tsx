@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MirrorIcon, SpongeIcon, TvIcon, BucketIcon, NotebookIcon } from './Icons';
+import { playSuccessChime, playSpinSound, playErrorSound, playHoverSound, playLockClickSound } from '../utils/soundEffects';
 
 const items = [
   { id: 'mirror', name: 'Mirror', Icon: MirrorIcon, feedback: 'Close… but a mirror only reflects.' },
@@ -55,14 +56,17 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
     setFeedbackItem(id);
     if (id === 'notebook') {
       if (onCorrectSelect) onCorrectSelect();
+      playSuccessChime();
       setFlashColor('green');
       setTimeout(() => setFlashColor(null), 300);
       setTimeout(() => {
         setFeedbackItem(null); // Hide annotation first
         setTimeout(() => {
           setUnlockStep(1); // Spin
+          playSpinSound();
           setTimeout(() => {
             setUnlockStep(2); // Lock open + sparkle
+            playLockClickSound();
             setTimeout(() => {
               onSelect();
             }, 600); // Wait for lock to open
@@ -70,6 +74,7 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
         }, 400); // Wait for exit animation of the text
       }, 1000); // Show "Correct :)" for 1 second
     } else {
+      playErrorSound();
       setFlashColor('red');
       setTimeout(() => setFlashColor(null), 300);
     }
@@ -192,6 +197,9 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
               className={`relative cursor-pointer group flex flex-col items-center ${isUnlocking && item.id === 'notebook' ? 'z-50' : ''}`}
               style={{ transformStyle: "preserve-3d" }}
               onClick={() => handleSelect(item.id)}
+              onMouseEnter={() => {
+                if (!isUnlocking) playHoverSound();
+              }}
               onMouseLeave={() => {
                 if (!isUnlocking && feedbackItem === item.id && item.id !== 'notebook') {
                   setFeedbackItem(null);
@@ -211,7 +219,7 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
                       scale: 1.2,
                       y: -20,
                       rotateY: 360,
-                      filter: "drop-shadow(0px 0px 50px rgba(168,85,247,1))"
+                      filter: "drop-shadow(0px 0px 80px rgba(255,255,255,1)) drop-shadow(0px 0px 120px rgba(168,85,247,1))"
                     }
                   : feedbackItem === item.id 
                     ? { 

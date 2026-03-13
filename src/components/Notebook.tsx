@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
+import { playHoverSound } from '../utils/soundEffects';
 
 const TOTAL_PAGES = 26;
 
@@ -11,7 +12,7 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
         <h1 className="text-5xl md:text-7xl font-serif italic font-medium tracking-wide mb-8 capitalize drop-shadow-sm text-slate-700" style={{ fontFamily: '"Playfair Display", serif' }}>Portfolio</h1>
         <div className="w-24 h-[1px] bg-slate-400"></div>
         <p className="text-sm text-slate-500 tracking-[0.3em] uppercase mt-8">Can Öztunc</p>
-        <span className="absolute bottom-2 right-2 text-slate-500 text-sm font-mono">01</span>
+        {/* <span className="absolute bottom-0 right-0 text-slate-500 text-sm font-mono">01</span> */}
       </div>
     );
   }
@@ -22,10 +23,7 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
         <p className="text-lg md:text-xl text-slate-600 tracking-widest leading-loose max-w-md italic">
           “Architecture is the learned game, correct and magnificent, of forms assembled in the light.”<br/><br/>— Le Corbusier
         </p>
-        <p className="text-lg md:text-xl text-slate-600 tracking-widest leading-loose max-w-md italic">
-          “A city that neglects the child neglects the future.”<br/><br/>— Aldo van Eyck
-        </p>
-        <span className="absolute bottom-2 left-2 text-slate-500 text-sm font-mono">00</span>
+        {/* <span className="absolute bottom-0 left-0 text-slate-500 text-sm font-mono">00</span> */}
       </div>
     );
   }
@@ -33,7 +31,7 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
   if (pageNum === TOTAL_PAGES - 2) {
     return (
       <div className="h-full relative">
-        <span className="absolute bottom-2 left-2 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 2}</span>
+        {/* <span className="absolute bottom-0 left-0 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 2}</span> */}
       </div>
     );
   }
@@ -44,7 +42,7 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
         <h2 className="text-3xl font-light tracking-widest mb-6">Fin.</h2>
         <div className="w-12 h-[1px] bg-slate-400 mb-6"></div>
         <p className="text-slate-600 tracking-wider">Thank you for observing.</p>
-        <span className="absolute bottom-2 right-2 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 1}</span>
+        {/* <span className="absolute bottom-0 right-0 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 1}</span> */}
       </div>
     );
   }
@@ -55,20 +53,23 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
 
   return (
     <div className="h-full flex flex-col text-slate-800 relative pt-4">
-      <div className="flex justify-between items-end mb-4 border-b border-slate-300 pb-2">
+      <div className="absolute top-0 left-0">
         <h2 className="text-2xl font-light tracking-wider uppercase text-slate-900">
           {isEven ? `Project ${projectNum}` : ''}
         </h2>
       </div>
-      <span className={`absolute bottom-2 ${isEven ? 'left-2' : 'right-2'} text-slate-500 text-sm font-mono`}>{pageNum < 10 ? `0${pageNum}` : pageNum}</span>
+      {/* <span className={`absolute bottom-0 ${isEven ? 'left-0' : 'right-0'} text-slate-500 text-sm font-mono`}>{pageNum < 10 ? `0${pageNum}` : pageNum}</span> */}
       
       {isEven ? (
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-6 mt-10">
           <div 
             className="relative w-full h-64 rounded-sm overflow-hidden group shadow-sm cursor-pointer"
             onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/arch${imageId}/800/500?grayscale`); }}
+            onMouseEnter={() => playHoverSound()}
           >
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-700 z-10" />
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
+              <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-xs tracking-widest uppercase font-light drop-shadow-md">Click to View</span>
+            </div>
             <img 
               src={`https://picsum.photos/seed/arch${imageId}/800/500?grayscale`} 
               alt="Architecture" 
@@ -85,8 +86,11 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
             <div 
               className="relative w-full h-48 md:h-full rounded-sm overflow-hidden group shadow-sm cursor-pointer"
               onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/detail${imageId}/400/400?grayscale`); }}
+              onMouseEnter={() => playHoverSound()}
             >
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-700 z-10" />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
+                <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-xs tracking-widest uppercase font-light drop-shadow-md text-center px-2">Click to View</span>
+              </div>
               <img 
                 src={`https://picsum.photos/seed/detail${imageId}/400/400?grayscale`} 
                 alt="Detail" 
@@ -97,15 +101,18 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-6 mt-10">
           <div className="grid grid-cols-3 gap-4 h-48">
              {[1, 2, 3].map((i) => (
                <div 
                  key={i} 
                  className="relative w-full h-full rounded-sm overflow-hidden group shadow-sm cursor-pointer"
                  onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/plan${imageId}${i}/300/400?grayscale`); }}
+                 onMouseEnter={() => playHoverSound()}
                >
-                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-700 z-10" />
+                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
+                   <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-[10px] tracking-widest uppercase font-light drop-shadow-md text-center px-1">Click to View</span>
+                 </div>
                  <img src={`https://picsum.photos/seed/plan${imageId}${i}/300/400?grayscale`} alt="Plan" className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" referrerPolicy="no-referrer" />
                </div>
              ))}
@@ -159,6 +166,14 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
   const [currentPage, setCurrentPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const initialMount = useRef(true);
+
+  useEffect(() => {
+    if (initialMount.current) {
+      initialMount.current = false;
+      return;
+    }
+  }, [currentPage]);
 
   const nextPage = () => {
     if (currentPage < TOTAL_PAGES - 2) {
@@ -251,6 +266,7 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
                   </motion.div>
                 </div>
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-black/5 to-transparent pointer-events-none z-20" />
+                <span className="absolute bottom-2 left-2 text-slate-500 text-sm font-mono z-30">{currentPage < 10 ? `0${currentPage}` : currentPage}</span>
               </motion.div>
 
               {/* Right Page */}
@@ -277,6 +293,7 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
                   </motion.div>
                 </div>
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black/5 to-transparent pointer-events-none z-20" />
+                <span className="absolute bottom-2 right-2 text-slate-500 text-sm font-mono z-30">{currentPage + 1 < 10 ? `0${currentPage + 1}` : currentPage + 1}</span>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -328,13 +345,13 @@ const ImageModal = ({ src, onClose }: { src: string, onClose: () => void }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex bg-black/95 backdrop-blur-md"
       onClick={onClose}
     >
-      <div className="flex-1 flex items-center justify-center p-8 overflow-hidden relative">
+      <div className="flex-1 flex items-center justify-center p-8 md:pr-[360px] overflow-hidden relative">
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: isZoomed ? 1.5 : 1, opacity: 1 }}
+          animate={{ scale: isZoomed ? 1.5 : 1.1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className={`relative inline-block ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`}
@@ -346,7 +363,7 @@ const ImageModal = ({ src, onClose }: { src: string, onClose: () => void }) => {
           <img 
             src={src} 
             alt="Fullscreen" 
-            className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
+            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
           />
           {!isZoomed && (
             <button 
@@ -364,19 +381,19 @@ const ImageModal = ({ src, onClose }: { src: string, onClose: () => void }) => {
 
       {/* Info Bar */}
       <motion.div 
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="w-full bg-[#111] border-t border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between text-gray-300 gap-6"
+        className="absolute right-0 top-0 bottom-0 w-full md:w-80 bg-[#111] border-l border-white/10 p-8 flex flex-col text-gray-300 gap-8 z-[120] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col md:w-1/4">
+        <div>
           <h3 className="text-xl font-serif text-white mb-2 uppercase tracking-widest">Project Details</h3>
           <div className="w-12 h-[1px] bg-white/20"></div>
         </div>
         
-        <div className="flex flex-col md:flex-row gap-6 md:gap-12 text-sm flex-1">
+        <div className="flex flex-col gap-6 text-sm flex-1">
           <div>
             <p className="text-gray-500 uppercase tracking-wider text-xs mb-1">Location</p>
             <p>Zurich, Switzerland</p>
