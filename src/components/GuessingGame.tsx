@@ -43,7 +43,7 @@ const TypewriterLine = ({ text, delay, className, skipAnimation }: { text: strin
   </motion.p>
 );
 
-export default function GuessingGame({ onSelect, hasOpenedNotebook }: { onSelect: () => void; hasOpenedNotebook?: boolean; key?: string }) {
+export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNotebook }: { onSelect: () => void; onCorrectSelect?: () => void; hasOpenedNotebook?: boolean; key?: string }) {
   const [feedbackItem, setFeedbackItem] = useState<string | null>(null);
   const [unlockStep, setUnlockStep] = useState<number>(0);
   const [flashColor, setFlashColor] = useState<'red' | 'green' | null>(null);
@@ -54,6 +54,7 @@ export default function GuessingGame({ onSelect, hasOpenedNotebook }: { onSelect
     if (isUnlocking || feedbackItem === 'notebook') return;
     setFeedbackItem(id);
     if (id === 'notebook') {
+      if (onCorrectSelect) onCorrectSelect();
       setFlashColor('green');
       setTimeout(() => setFlashColor(null), 300);
       setTimeout(() => {
