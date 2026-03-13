@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-riddle: "Cinzel", serif;
+}
+
+@layer utilities {
+  .bg-gloomy-pulse {
+    background-color: #050508;
+    background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='2' height='2' fill='%23ffffff' fill-opacity='0.05'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+    background-size: 4px 4px;
+    image-rendering: pixelated;
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  .bg-gloomy-pulse::before, .bg-gloomy-pulse::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: pulse 15s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .bg-gloomy-pulse::before {
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(circle, rgba(110, 20, 50, 0.45) 0%, rgba(10, 15, 25, 0) 70%);
+    top: -20vw;
+    left: -20vw;
+  }
+  
+  .bg-gloomy-pulse::after {
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, rgba(20, 70, 100, 0.4) 0%, rgba(15, 10, 20, 0) 70%);
+    bottom: -15vw;
+    right: -15vw;
+    animation-delay: -7s;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8) translate(0, 0); opacity: 0.55; }
+  100% { transform: scale(1.2) translate(5%, 5%); opacity: 0.9; }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #050508;
+  color: #e2e8f0;
+}
