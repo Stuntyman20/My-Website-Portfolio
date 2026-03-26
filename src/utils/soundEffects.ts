@@ -111,31 +111,35 @@ export const playHoverSound = () => {
   gain.connect(ctx.destination);
   
   gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.007, t + 0.01); // 35% of previous volume
+  gain.gain.linearRampToValueAtTime(0.00455, t + 0.01); // 65% of 0.007
   gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
   
   osc.start(t);
   osc.stop(t + 0.1);
 };
 
-export const playLockClickSound = () => {
+export const playTwinkleSound = () => {
   const ctx = getAudioContext();
   const t = ctx.currentTime;
   
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+  const freqs = [1046.50, 1318.51, 1567.98, 2093.00]; // C6, E6, G6, C7
   
-  osc.type = 'square';
-  osc.frequency.setValueAtTime(800, t);
-  osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
-  
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  
-  gain.gain.setValueAtTime(0, t);
-  gain.gain.linearRampToValueAtTime(0.1, t + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-  
-  osc.start(t);
-  osc.stop(t + 0.05);
+  freqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    const startTime = t + i * 0.08;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.05, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+    
+    osc.start(startTime);
+    osc.stop(startTime + 0.4);
+  });
 };

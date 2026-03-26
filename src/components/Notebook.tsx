@@ -1,29 +1,117 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
-import { playHoverSound } from '../utils/soundEffects';
 
 const TOTAL_PAGES = 26;
 
-const getPageContent = (pageNum: number, onImageClick: (src: string) => void) => {
+const JumpingText = ({ text, delay = 0, start = true, skipAnimation = false }: { text: string, delay?: number, start?: boolean, skipAnimation?: boolean }) => {
+  return (
+    <h1 className="text-4xl md:text-5xl font-serif italic font-medium tracking-wide mb-8 capitalize drop-shadow-sm text-slate-700 flex" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+      {text.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          initial={skipAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 0 }}
+          animate={start ? { opacity: 1, y: [0, -4, 0] } : { opacity: 0, y: 0 }}
+          transition={{
+            opacity: { delay: skipAnimation ? 0 : delay + i * 0.1, duration: skipAnimation ? 0 : 0.5 },
+            y: {
+              duration: 0.4,
+              repeat: Infinity,
+              repeatDelay: 3,
+              delay: skipAnimation ? i * 0.1 : delay + i * 0.1,
+            }
+          }}
+          style={{ display: 'inline-block', whiteSpace: 'pre' }}
+        >
+          {char}
+        </motion.span>
+      ))}
+    </h1>
+  );
+};
+
+const TypewriterQuote = ({ skipAnimation }: { skipAnimation?: boolean }) => {
+  const text = "“Architecture is the learned game, correct and magnificent, of forms assembled in the light.”\n\n— Le Corbusier";
+  const [start, setStart] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setStart(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <motion.p 
+      className="text-lg md:text-xl text-slate-600 tracking-widest leading-loose max-w-md italic whitespace-pre-line"
+      initial={skipAnimation ? "visible" : "hidden"}
+      animate={skipAnimation || start ? "visible" : "hidden"}
+      variants={{
+        hidden: { opacity: 1 },
+        visible: {
+          opacity: 1,
+          transition: {
+            delayChildren: skipAnimation ? 0 : 1.8,
+            staggerChildren: skipAnimation ? 0 : 0.04
+          }
+        }
+      }}
+    >
+      {text.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 }
+          }}
+        >
+          {char}
+        </motion.span>
+      ))}
+    </motion.p>
+  );
+};
+
+const PageOneContent = ({ formattedPageNum, skipAnimation }: { formattedPageNum: string | number, skipAnimation?: boolean }) => {
+  const [start, setStart] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setStart(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  const portfolioDelay = skipAnimation ? 0 : 6.2;
+  const nameDelay = skipAnimation ? 0 : 7.6;
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center text-slate-800 relative">
+      <JumpingText text="Portfolio" delay={portfolioDelay} start={skipAnimation || start} skipAnimation={skipAnimation} />
+      <motion.div 
+        initial={skipAnimation ? { opacity: 1 } : { opacity: 0 }}
+        animate={skipAnimation || start ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: nameDelay, duration: skipAnimation ? 0 : 0.8 }}
+        className="w-24 h-[1px] bg-slate-400"
+      />
+      <motion.p 
+        initial={skipAnimation ? { opacity: 1 } : { opacity: 0 }}
+        animate={skipAnimation || start ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: nameDelay, duration: skipAnimation ? 0 : 1 }}
+        className="text-sm text-slate-500 tracking-[0.3em] uppercase mt-8"
+      >
+        Can Öztunc
+      </motion.p>
+    </div>
+  );
+};
+
+const getPageContent = (pageNum: number, onImageClick: (src: string) => void, skipIntro: boolean) => {
+  const displayPageNum = pageNum + 1;
+  const formattedPageNum = displayPageNum < 10 ? `0${displayPageNum}` : displayPageNum;
+
   if (pageNum === 1) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center text-slate-800 relative">
-        <h1 className="text-5xl md:text-7xl font-serif italic font-medium tracking-wide mb-8 capitalize drop-shadow-sm text-slate-700" style={{ fontFamily: '"Playfair Display", serif' }}>Portfolio</h1>
-        <div className="w-24 h-[1px] bg-slate-400"></div>
-        <p className="text-sm text-slate-500 tracking-[0.3em] uppercase mt-8">Can Öztunc</p>
-        {/* <span className="absolute bottom-0 right-0 text-slate-500 text-sm font-mono">01</span> */}
-      </div>
-    );
+    return <PageOneContent formattedPageNum={formattedPageNum} skipAnimation={skipIntro} />;
   }
   
   if (pageNum === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center text-slate-800 relative -ml-4 md:-ml-8 gap-12">
-        <p className="text-lg md:text-xl text-slate-600 tracking-widest leading-loose max-w-md italic">
-          “Architecture is the learned game, correct and magnificent, of forms assembled in the light.”<br/><br/>— Le Corbusier
-        </p>
-        {/* <span className="absolute bottom-0 left-0 text-slate-500 text-sm font-mono">00</span> */}
+      <div className="h-full flex flex-col items-center justify-center text-center text-slate-800 relative gap-12">
+        <TypewriterQuote skipAnimation={skipIntro} />
       </div>
     );
   }
@@ -31,7 +119,6 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
   if (pageNum === TOTAL_PAGES - 2) {
     return (
       <div className="h-full relative">
-        {/* <span className="absolute bottom-0 left-0 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 2}</span> */}
       </div>
     );
   }
@@ -39,10 +126,9 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
   if (pageNum === TOTAL_PAGES - 1) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center text-slate-800 relative">
-        <h2 className="text-3xl font-light tracking-widest mb-6">Fin.</h2>
+        <h2 className="text-3xl font-light tracking-widest mb-6" style={{ fontFamily: '"Cormorant Garamond", serif' }}>Fin.</h2>
         <div className="w-12 h-[1px] bg-slate-400 mb-6"></div>
         <p className="text-slate-600 tracking-wider">Thank you for observing.</p>
-        {/* <span className="absolute bottom-0 right-0 text-slate-500 text-sm font-mono">{TOTAL_PAGES - 1}</span> */}
       </div>
     );
   }
@@ -54,18 +140,16 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
   return (
     <div className="h-full flex flex-col text-slate-800 relative pt-4">
       <div className="absolute top-0 left-0">
-        <h2 className="text-2xl font-light tracking-wider uppercase text-slate-900">
+        <h2 className="text-2xl font-light tracking-wider uppercase text-slate-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
           {isEven ? `Project ${projectNum}` : ''}
         </h2>
       </div>
-      {/* <span className={`absolute bottom-0 ${isEven ? 'left-0' : 'right-0'} text-slate-500 text-sm font-mono`}>{pageNum < 10 ? `0${pageNum}` : pageNum}</span> */}
       
       {isEven ? (
         <div className="flex-1 flex flex-col gap-6 mt-10">
           <div 
             className="relative w-full h-64 rounded-sm overflow-hidden group shadow-sm cursor-pointer"
             onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/arch${imageId}/800/500?grayscale`); }}
-            onMouseEnter={() => playHoverSound()}
           >
             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
               <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-xs tracking-widest uppercase font-light drop-shadow-md">Click to View</span>
@@ -86,7 +170,6 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
             <div 
               className="relative w-full h-48 md:h-full rounded-sm overflow-hidden group shadow-sm cursor-pointer"
               onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/detail${imageId}/400/400?grayscale`); }}
-              onMouseEnter={() => playHoverSound()}
             >
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
                 <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-xs tracking-widest uppercase font-light drop-shadow-md text-center px-2">Click to View</span>
@@ -108,7 +191,6 @@ const getPageContent = (pageNum: number, onImageClick: (src: string) => void) =>
                  key={i} 
                  className="relative w-full h-full rounded-sm overflow-hidden group shadow-sm cursor-pointer"
                  onClick={(e) => { e.stopPropagation(); onImageClick(`https://picsum.photos/seed/plan${imageId}${i}/300/400?grayscale`); }}
-                 onMouseEnter={() => playHoverSound()}
                >
                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-700 z-10 flex items-center justify-center">
                    <span className="text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-700 text-[10px] tracking-widest uppercase font-light drop-shadow-md text-center px-1">Click to View</span>
@@ -167,6 +249,13 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
   const [direction, setDirection] = useState(1);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const initialMount = useRef(true);
+  const [skipIntro, setSkipIntro] = useState(false);
+
+  useEffect(() => {
+    if (currentPage > 0) {
+      setSkipIntro(true);
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     if (initialMount.current) {
@@ -262,11 +351,10 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
                     transition={{ delay: 0.4, duration: 0.4 }}
                     className="h-full"
                   >
-                    {getPageContent(currentPage, setSelectedImage)}
+                    {getPageContent(currentPage, setSelectedImage, skipIntro)}
                   </motion.div>
                 </div>
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-black/5 to-transparent pointer-events-none z-20" />
-                <span className="absolute bottom-2 left-2 text-slate-500 text-sm font-mono z-30">{currentPage < 10 ? `0${currentPage}` : currentPage}</span>
               </motion.div>
 
               {/* Right Page */}
@@ -289,11 +377,10 @@ export default function Notebook({ onClose }: { onClose: () => void; key?: strin
                     transition={{ delay: 0.4, duration: 0.4 }}
                     className="h-full"
                   >
-                    {getPageContent(currentPage + 1, setSelectedImage)}
+                    {getPageContent(currentPage + 1, setSelectedImage, skipIntro)}
                   </motion.div>
                 </div>
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black/5 to-transparent pointer-events-none z-20" />
-                <span className="absolute bottom-2 right-2 text-slate-500 text-sm font-mono z-30">{currentPage + 1 < 10 ? `0${currentPage + 1}` : currentPage + 1}</span>
               </motion.div>
             </AnimatePresence>
           </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MirrorIcon, SpongeIcon, TvIcon, BucketIcon, NotebookIcon } from './Icons';
-import { playSuccessChime, playSpinSound, playErrorSound, playHoverSound, playLockClickSound } from '../utils/soundEffects';
+import { playSuccessChime, playSpinSound, playErrorSound, playHoverSound, playTwinkleSound } from '../utils/soundEffects';
 
 const items = [
   { id: 'mirror', name: 'Mirror', Icon: MirrorIcon, feedback: 'Close… but a mirror only reflects.' },
@@ -44,6 +44,26 @@ const TypewriterLine = ({ text, delay, className, skipAnimation }: { text: strin
   </motion.p>
 );
 
+const SmokeCloud = ({ delay, skip }: { delay: number, skip: boolean }) => {
+  if (skip) return null;
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none flex items-center justify-center z-50"
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ 
+        opacity: [0, 0.3, 0],
+        scale: [0.5, 1.2, 1.5],
+        filter: ["blur(5px)", "blur(10px)", "blur(20px)"]
+      }}
+      transition={{ delay, duration: 1.5, ease: "easeOut" }}
+    >
+      <div className="w-24 h-24 bg-gray-300 rounded-full mix-blend-screen opacity-20 blur-xl" />
+      <div className="absolute w-32 h-32 bg-gray-400 rounded-full mix-blend-screen opacity-10 blur-2xl translate-x-4 -translate-y-4" />
+      <div className="absolute w-20 h-20 bg-gray-200 rounded-full mix-blend-screen opacity-15 blur-lg -translate-x-4 translate-y-4" />
+    </motion.div>
+  );
+};
+
 export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNotebook }: { onSelect: () => void; onCorrectSelect?: () => void; hasOpenedNotebook?: boolean; key?: string }) {
   const [feedbackItem, setFeedbackItem] = useState<string | null>(null);
   const [unlockStep, setUnlockStep] = useState<number>(0);
@@ -66,7 +86,7 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
           playSpinSound();
           setTimeout(() => {
             setUnlockStep(2); // Lock open + sparkle
-            playLockClickSound();
+            playTwinkleSound();
             setTimeout(() => {
               onSelect();
             }, 600); // Wait for lock to open
@@ -243,6 +263,7 @@ export default function GuessingGame({ onSelect, onCorrectSelect, hasOpenedNoteb
                       }
               }
             >
+              <SmokeCloud delay={9.0 + index * 0.8} skip={hasOpenedNotebook || false} />
               <div className="w-24 h-24 md:w-32 md:h-32 transition-all duration-500 group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">
                 <item.Icon unlockStep={item.id === 'notebook' ? unlockStep : undefined} />
               </div>
